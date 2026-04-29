@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/shopify_uat_1.html" }
+  ]
+}

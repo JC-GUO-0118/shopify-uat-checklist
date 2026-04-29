@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopify UAT Checklist</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f8fafc;--bg3:#f1f5f9;
+  --text:#1e293b;--text2:#64748b;--text3:#94a3b8;
+  --bd:#e2e8f0;--bd2:#cbd5e1;
+  --blue:#2563eb;--blue-bg:#eff6ff;--blue-text:#1d4ed8;--blue-bd:#93c5fd;
+  --green:#166534;--green-bg:#f0fdf4;--green-bd:#86efac;
+  --red:#991b1b;--red-bg:#fef2f2;--red-bd:#fca5a5;
+  --amber:#92400e;--amber-bg:#fffbeb;--amber-bd:#fcd34d;
+  --r:8px;--rl:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#fff;color:var(--text);font-size:14px}
+.app{max-width:860px;margin:0 auto;min-height:100vh}
+
+.hdr{padding:1rem 1.25rem .65rem;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.hdr h1{font-size:16px;font-weight:600}
+.hdr p{font-size:12px;color:var(--text2);margin-top:3px}
+#langBtn{flex-shrink:0;margin-top:2px;padding:4px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg2);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer}
+
+.locale-bar{display:flex;gap:6px;padding:.65rem 1.25rem;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.loc{padding:5px 13px;border-radius:var(--r);border:1px solid var(--bd2);background:#fff;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer}
+.loc.on{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-bd)}
+
+.prog{padding:.45rem 1.25rem;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.prog-track{flex:1;height:5px;background:var(--bd);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:#22c55e;border-radius:3px;transition:width .3s}
+.prog-txt{font-size:11px;color:var(--text2);white-space:nowrap}
+
+.tabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--bd);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:.5rem .9rem;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;flex-shrink:0}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.bx{display:inline-block;margin-left:4px;font-size:10px;padding:1px 5px;border-radius:8px;font-weight:400}
+.bx-f{background:var(--red-bg);color:var(--red)}
+.bx-ok{background:var(--green-bg);color:var(--green)}
+
+.ph{padding:.6rem 1.25rem;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ph-l{flex:1;min-width:0}
+.ph-title{font-size:13px;font-weight:600}
+.ph-url{font-size:10px;color:var(--text3);margin-top:2px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.open-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:var(--r);border:1px solid var(--bd2);background:#fff;color:var(--text2);font-size:12px;text-decoration:none;white-space:nowrap;flex-shrink:0}
+
+.panel{padding:1rem 1.25rem;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+@media(max-width:540px){.panel{grid-template-columns:1fr}}
+.panel-note{grid-column:1/-1;padding:.65rem 1rem;border-radius:var(--r);background:var(--amber-bg);border:1px solid var(--amber-bd);font-size:12px;color:var(--amber);line-height:1.5}
+.card{display:flex;flex-direction:column;gap:7px;padding:1rem;border-radius:var(--rl);border:1px solid var(--bd);background:#fff;min-width:0;overflow:hidden}
+.card-tag{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.card-name{font-size:14px;font-weight:600}
+.card-url{font-size:10px;color:var(--text3);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.card-status{font-size:11px;color:var(--text2)}
+.card-status.sf{color:var(--red)}.card-status.sok{color:var(--green)}
+.card-jump{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:var(--r);border:1px solid var(--blue-bd);background:var(--blue-bg);color:var(--blue-text);font-size:12px;font-weight:500;text-decoration:none;margin-top:4px}
+.card-cl{font-size:11px;color:var(--text2);background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:5px 10px;cursor:pointer;text-align:center;width:100%}
+
+.back-bar{display:flex;align-items:center;gap:8px;padding:.5rem 1.25rem;border-bottom:1px solid var(--bd);background:var(--bg2);flex-wrap:wrap}
+.back-btn{font-size:12px;color:var(--text2);background:#fff;border:1px solid var(--bd2);border-radius:var(--r);padding:4px 10px;cursor:pointer;flex-shrink:0}
+.back-name{font-size:13px;font-weight:600}
+.back-tmpl{font-size:11px;color:var(--text3)}
+.back-open{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-text);text-decoration:none;padding:4px 10px;border:1px solid var(--blue-bd);border-radius:var(--r);flex-shrink:0}
+
+.sec-hdr{padding:.4rem 1.25rem;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:6px}
+.stag{padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.sf{background:var(--blue-bg);color:var(--blue-text)}
+.su{background:var(--amber-bg);color:var(--amber)}
+.sl{background:var(--green-bg);color:var(--green)}
+
+.row{display:flex;align-items:flex-start;gap:10px;padding:.6rem 1.25rem;border-bottom:1px solid var(--bd)}
+.row:last-child{border-bottom:none}
+.row.dp{background:var(--green-bg)}.row.df{background:var(--red-bg)}.row.dn{background:var(--amber-bg)}
+.ri{flex:1;min-width:0}
+.rm{display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap}
+.rno{font-size:10px;color:var(--text3);font-family:monospace}
+.rlink{display:inline-flex;align-items:center;gap:2px;font-size:10px;color:var(--blue-text);text-decoration:none;padding:1px 6px;border-radius:4px;border:1px solid var(--blue-bd)}
+.rtxt{font-size:13px;line-height:1.5}
+.rexp{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.rnote{font-size:11px;color:var(--amber);margin-top:4px;padding:4px 8px;background:var(--amber-bg);border-radius:4px;line-height:1.5;border:1px solid var(--amber-bd)}
+.rbtns{display:flex;gap:4px;flex-shrink:0;padding-top:2px}
+.rb{width:32px;height:28px;border-radius:var(--r);border:1px solid var(--bd2);background:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.rb.rp{background:var(--green-bg);border-color:var(--green-bd);color:var(--green);font-weight:600}
+.rb.rf{background:var(--red-bg);border-color:var(--red-bd);color:var(--red);font-weight:600}
+.rb.rn{background:var(--amber-bg);border-color:var(--amber-bd);color:var(--amber);font-weight:600}
+.ev-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ev-btn,.ev-remove{padding:4px 8px;border-radius:var(--r);border:1px solid var(--bd2);background:#fff;color:var(--text2);font-size:11px;cursor:pointer}
+.ev-btn:hover,.ev-remove:hover{border-color:var(--blue-bd);color:var(--blue-text)}
+.ev-empty{font-size:11px;color:var(--text3)}
+.ev-thumb{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:220px;padding:3px 7px 3px 3px;border:1px solid var(--bd);border-radius:var(--r);background:var(--bg2);font-size:11px;color:var(--text2);text-decoration:none}
+.ev-thumb img{width:34px;height:24px;object-fit:cover;border-radius:5px;border:1px solid var(--bd2);background:#fff;flex-shrink:0}
+.ev-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.note-row{display:flex;align-items:flex-start;gap:10px;padding:.6rem 1.25rem;border-bottom:1px solid var(--bd);background:var(--bg2)}
+.note-lbl{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;padding-top:6px;min-width:90px}
+.note-row textarea{flex:1;font-size:12px;font-family:inherit;border:1px solid var(--bd2);border-radius:var(--r);padding:6px 9px;background:#fff;color:var(--text);resize:vertical;min-height:40px;line-height:1.5}
+.note-row textarea:focus{outline:none;border-color:var(--blue)}
+
+.footer{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--bd2);padding:.55rem 1.25rem;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fst{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px}
+.fst b{font-weight:600;font-size:13px}
+.fp{color:var(--green)}.ff{color:var(--red)}.fn{color:var(--amber)}
+.exp{margin-left:auto;font-size:12px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg2);color:var(--text2);cursor:pointer}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--rl);border:1px solid var(--bd2);width:100%;max-width:640px;max-height:80vh;display:flex;flex-direction:column}
+.modal-hdr{padding:1rem 1.25rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.modal-hdr h2{font-size:14px;font-weight:600}
+.modal-x{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);line-height:1}
+.modal-body{padding:1rem 1.25rem;overflow-y:auto;flex:1}
+.modal-body textarea{width:100%;height:320px;font-family:monospace;font-size:11px;border:1px solid var(--bd2);border-radius:var(--r);padding:8px;background:var(--bg2);color:var(--text);resize:none}
+.modal-ft{padding:.75rem 1.25rem;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:8px}
+.btn-cl{padding:6px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:#fff;color:var(--text2);font-size:13px;cursor:pointer}
+.btn-cp{padding:6px 14px;border-radius:var(--r);border:none;background:var(--blue);color:#fff;font-size:13px;font-weight:500;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div><h1 id="H_title">Shopify UAT Checklist</h1><p id="H_sub">diy-booknookkit.com · Select locale → page → open → mark results</p></div>
+    <button id="langBtn" onclick="toggleLang()">中文</button>
+  </div>
+  <div class="locale-bar" id="localeBar"></div>
+  <div class="prog" id="progBar" style="display:none">
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-txt" id="progTxt"></div>
+  </div>
+  <div class="tabs" id="tabBar" style="display:none"></div>
+  <div id="pageHead" style="display:none"><div class="ph" id="pageHeadInner"></div></div>
+  <div id="body"></div>
+  <div class="footer" id="footer" style="display:none">
+    <div class="fst"><span id="L_pass">Pass</span> <b class="fp" id="fPass">0</b></div>
+    <div class="fst"><span id="L_fail">Fail</span> <b class="ff" id="fFail">0</b></div>
+    <div class="fst"><span id="L_na">N/A</span>  <b class="fn" id="fNA">0</b></div>
+    <button class="exp" id="expBtn" onclick="openExport()">Export summary ↗</button>
+  </div>
+</div>
+
+<input id="evidenceInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-hdr"><h2 id="L_modalTitle">UAT Summary Export</h2><button class="modal-x" onclick="closeExport()">×</button></div>
+    <div class="modal-body"><textarea id="exportTa" readonly></textarea></div>
+    <div class="modal-ft">
+      <button class="btn-cl" onclick="closeExport()" id="L_close">Close</button>
+      <button class="btn-cp" id="copyBtn" onclick="doCopy()">Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Language ────────────────────────────────────────────────────────────────
+var LNG = 'en';
+
+var EN = {
+  title:'Shopify UAT Checklist', sub:'diy-booknookkit.com · Select locale → page → open → mark results',
+  langBtn:'中文', pass:'Pass', fail:'Fail', na:'N/A', export:'Export summary ↗',
+  modalTitle:'UAT Summary Export', close:'Close', copy:'Copy to clipboard', copied:'Copied!',
+  tested:'tested', notStarted:'Not started', allPass:'· All pass',
+  fillChecklist:'Fill in checklist', openProduct:'Open product ↗', openPage:'Open page ↗',
+  backProducts:'← All products', backPolicies:'← All policies',
+  uploadImg:'Upload image', captureImg:'Screenshot', noEvidence:'No evidence image',
+  removeEvidence:'Remove', evidence:'Evidence images:',
+  badImage:'Please choose a PNG, JPG, WebP or GIF image.',
+  readImageFail:'Could not read this image file.',
+  shotUnsupported:'Screenshot capture is not supported in this browser or context.',
+  shotCancelled:'Screenshot was cancelled or blocked.',
+  sellyNote:'<strong>Note:</strong> This site uses <strong>Selly Easy</strong> instead of native Shopify add-to-cart. No quantity selector — Add to Cart button only. If no button appears, the product is out of stock — this is <strong>expected behaviour, not a bug</strong>.',
+  tabs:{home:'Homepage',collection:'Collection',product:'Product',cart:'Cart',checkout:'Checkout',thankyou:'Thank You',faq:'FAQ',policy:'Policies'},
+  openPage2:{home:'Open Homepage',collection:'Open Collection',cart:'Open Cart',checkout:'Open Checkout',thankyou:'Open Thank You',faq:'Open FAQ'},
+  sec:{func:'Functional',ux:'Interaction & Animation',lang:'Language & Localisation'},
+};
+var ZH = {
+  title:'Shopify UAT 测试清单', sub:'diy-booknookkit.com · 选择语言 → 选择页面 → 打开 → 标记结果',
+  langBtn:'English', pass:'通过', fail:'失败', na:'不适用', export:'导出测试结果 ↗',
+  modalTitle:'UAT 测试结果导出', close:'关闭', copy:'复制到剪贴板', copied:'已复制！',
+  tested:'已测试', notStarted:'未开始', allPass:'· 全部通过',
+  fillChecklist:'填写清单', openProduct:'打开产品页 ↗', openPage:'打开页面 ↗',
+  backProducts:'← 返回所有产品', backPolicies:'← 返回所有政策',
+  uploadImg:'上传图片', captureImg:'一键截图', noEvidence:'暂无证据图片',
+  removeEvidence:'移除', evidence:'证据图片：',
+  badImage:'请选择 PNG、JPG、WebP 或 GIF 图片。',
+  readImageFail:'无法读取这张图片。',
+  shotUnsupported:'当前浏览器或打开方式不支持截图功能。',
+  shotCancelled:'截图已取消或被浏览器阻止。',
+  sellyNote:'<strong>注意：</strong>本站使用 <strong>Selly Easy</strong> 替代 Shopify 原生加购功能。没有数量选择器——仅有加入购物车按钮。如果按钮不显示，说明该产品已缺货，这是<strong>正常现象，不是 Bug</strong>。',
+  tabs:{home:'首页',collection:'分类页',product:'产品页',cart:'购物车',checkout:'结账',thankyou:'感谢页',faq:'常见问题',policy:'政策页'},
+  openPage2:{home:'打开首页',collection:'打开分类页',cart:'打开购物车',checkout:'打开结账页',thankyou:'打开感谢页',faq:'打开 FAQ'},
+  sec:{func:'功能测试',ux:'交互 & 动效',lang:'语言 & 本地化'},
+};
+function L(k){ return (LNG==='zh'?ZH:EN)[k]; }
+
+function toggleLang(){
+  LNG = LNG==='en'?'zh':'en';
+  applyStaticLang();
+  if(activeSite) renderAll();
+}
+function applyStaticLang(){
+  document.getElementById('H_title').textContent = L('title');
+  document.getElementById('H_sub').textContent = L('sub');
+  document.getElementById('langBtn').textContent = L('langBtn');
+  document.getElementById('L_pass').textContent = L('pass');
+  document.getElementById('L_fail').textContent = L('fail');
+  document.getElementById('L_na').textContent = L('na');
+  document.getElementById('expBtn').textContent = L('export');
+  document.getElementById('L_modalTitle').textContent = L('modalTitle');
+  document.getElementById('L_close').textContent = L('close');
+  document.getElementById('copyBtn').textContent = L('copy');
+}
+
+// ─── Item translations ────────────────────────────────────────────────────────
+var ZH_ITEMS = {
+  'H-01':{t:'页面正常加载，无报错',e:'HTTP 200，所有资源正常加载'},
+  'H-02':{t:'Hero Banner 图片/视频正常，无变形',e:'比例正确，分辨率合格'},
+  'H-03':{t:'Hero CTA 按钮跳转正确',e:'跳转至正确的分类或产品页'},
+  'H-04':{t:'所有主导航菜单项可点击展开',e:'下拉菜单正常，无死链'},
+  'H-05':{t:'Logo 点击返回首页',e:'跳转至当前语言首页路径'},
+  'H-06':{t:'精选商品卡片显示图片和价格',e:'无破图，货币符号正确'},
+  'H-07':{t:'Announcement Bar 链接可点击',e:'跳转至配送政策页面'},
+  'H-08':{t:'页脚所有链接有效（政策/社媒/联系）',e:'无死链'},
+  'H-09':{t:'Newsletter 订阅表单可提交',e:'提交后显示成功提示'},
+  'H-UX1':{t:'导航下拉菜单动效流畅',e:'无卡顿，过渡自然'},
+  'H-UX2':{t:'商品卡片 Hover 效果正常',e:'响应及时，无闪烁'},
+  'H-UX3':{t:'页面滚动流畅，无抖动',e:'滚动顺滑，无布局错位'},
+  'H-UX4':{t:'移动端 Hamburger 菜单动效正常',e:'开关动效正确'},
+  'H-UX5':{t:'移动端无横向滚动或内容溢出',e:'所有元素在 < 768px 视口内'},
+  'H-L1':{t:'Announcement Bar 文字表达自然',e:'非机器直译，符合当地用语'},
+  'H-L2':{t:'Hero Banner 标题/副标题措辞地道',e:'语气符合品牌，不生硬'},
+  'H-L3':{t:'货币与语言与当前站点匹配',e:'FR→€  DE→€  UK→£  US→$'},
+  'C-01':{t:'分类标题和描述文字正确',e:'与后台设置一致，无占位符'},
+  'C-02':{t:'所有商品卡片图片正常加载',e:'无破图，alt 标签存在'},
+  'C-03':{t:'卡片显示名称、价格、售罄标签',e:'信息完整，无空白卡片'},
+  'C-04':{t:'排序（价格/新品）功能正常',e:'商品顺序正确变化'},
+  'C-05':{t:'筛选功能正常（如有）',e:'选中条件后列表实时更新'},
+  'C-06':{t:'点击卡片跳转至正确产品页',e:'URL 正确，商品信息一致'},
+  'C-UX1':{t:'筛选/排序切换流畅，无整页闪烁',e:'列表更新无白屏'},
+  'C-UX2':{t:'移动端 1-2 列自适应，无溢出',e:'布局整洁，图片不变形'},
+  'C-UX3':{t:'加载更多/无限滚动触发及时',e:'接近底部时自动加载下一批'},
+  'C-L1':{t:'分类标题/描述措辞自然',e:'无机器直译痕迹'},
+  'C-L2':{t:'筛选标签文字本地化正确',e:'颜色、尺码、类别名称符合当地表达'},
+  'P-01':{t:'产品标题、价格显示正确',e:'与 Shopify 后台一致'},
+  'P-02':{t:'产品图片及轮播功能正常',e:'缩略图可点击，主图同步更新'},
+  'P-03':{t:'变体选择切换正确',e:'切换后图片和价格同步更新'},
+  'P-04':{t:'加入购物车按钮功能正常',e:'Cart 数量 +1，侧边栏弹出'},
+  'P-05':{t:'缺货时加入购物车按钮不显示（正常现象）',e:'本站使用 Selly Easy，无数量选择器。缺货时按钮不显示为正常现象，非 Bug。'},
+  'P-06':{t:'立即购买按钮直接跳转结账（如显示）',e:'跳转至 /checkout 且商品已带入'},
+  'P-07':{t:'产品页内嵌视频正常加载播放',e:'无转圈加载失败，视频可播放'},
+  'P-08':{t:'FAQ 区域展开/收起正常',e:'Accordion 交互正常，内容完整'},
+  'P-09':{t:'Discover More 系列推荐模块正常显示',e:'相关产品卡片加载，链接可跳转'},
+  'P-10':{t:'滚动 Marquee 条正常运动',e:'持续滚动，无卡顿'},
+  'P-11':{t:'Why Choose Us 三栏模块完整显示',e:'三列均显示图标+文字'},
+  'P-12':{t:'产品评论区正常加载',e:'星级、文字、日期均可见'},
+  'P-13':{t:'价格显示本地货币',e:'FR/DE/NL→€  UK→£  US→$'},
+  'P-UX1':{t:'图片轮播切换动效流畅',e:'无卡顿，缩略图高亮同步'},
+  'P-UX2':{t:'加购按钮点击反馈即时',e:'操作后 <0.5s 有视觉反馈'},
+  'P-UX3':{t:'FAQ Accordion 动画自然',e:'高度过渡平滑，无跳帧'},
+  'P-UX4':{t:'各 Section 滚动进入动效正常',e:'渐入/滑入效果流畅'},
+  'P-UX5':{t:'移动端布局正常，各 Section 不错位',e:'视频、FAQ、Why Choose Us 正常排列'},
+  'P-L1':{t:'产品标题、描述措辞自然',e:'无机器直译感'},
+  'P-L2':{t:'FAQ 问答表达地道',e:'符合当地用户阅读习惯'},
+  'P-L3':{t:'Why Choose Us 文案本地化正确',e:'卖点表达贴近当地消费文化'},
+  'P-L4':{t:'按钮文字（加入购物车/立即购买）表达自然',e:'非直译'},
+  'CA-01':{t:'购物车正确显示已加入商品',e:'名称、变体、价格均正确'},
+  'CA-02':{t:'修改数量后合计实时更新',e:'总价立即重新计算'},
+  'CA-03':{t:'移除商品后合计重算',e:'商品消失，总价更新'},
+  'CA-04':{t:'折扣码输入可用，有效码正确扣减',e:'无效码显示错误提示'},
+  'CA-05':{t:'结账按钮跳转至 /checkout，商品带入',e:'购物车内容完整同步'},
+  'CA-06':{t:'空购物车显示友好提示+引导按钮',e:'CTA 跳转至首页或分类页'},
+  'CA-UX1':{t:'数量修改后价格更新无明显延迟',e:'1秒内更新，无白屏闪烁'},
+  'CA-UX2':{t:'移动端购物车布局正常',e:'无元素重叠或溢出'},
+  'CA-L1':{t:'购物车页面所有文字语言正确',e:'小计、结账按钮等已本地化'},
+  'CK-01':{t:'结账页面正确显示订单摘要',e:'与购物车内容完全一致'},
+  'CK-02':{t:'邮箱字段格式校验有效',e:'格式错误时显示提示'},
+  'CK-03':{t:'收货地址必填项校验正常',e:'空提交显示字段级错误提示'},
+  'CK-04':{t:'运费选项正确显示，可选择',e:'费用准确，符合配送设置'},
+  'CK-05':{t:'支付方式完整显示',e:'与后台支付网关配置一致'},
+  'CK-06':{t:'测试支付成功完成（Test Mode）',e:'订单创建，确认邮件发出'},
+  'CK-07':{t:'支付失败时显示友好错误信息',e:'提示具体原因，不丢失填写数据'},
+  'CK-08':{t:'SSL 锁图标可见，全程 HTTPS',e:'浏览器地址栏无安全警告'},
+  'CK-UX1':{t:'表单字段切换（Tab/点击）流畅',e:'焦点状态清晰，无跳跃'},
+  'CK-UX2':{t:'移动端键盘弹起后表单仍可见',e:'所有字段可正常填写'},
+  'CK-UX3':{t:'国家切换后省市字段联动正常',e:'字段根据国家实时更新'},
+  'CK-L1':{t:'结账页面语言与当前站点一致',e:'无其他语言混杂'},
+  'CK-L2':{t:'错误提示信息为当地语言',e:'非英文默认提示'},
+  'TY-01':{t:'感谢页正确显示订单号',e:'Order #XXXXX 清晰可见'},
+  'TY-02':{t:'订单摘要（商品/数量/总价）正确',e:'与实际下单内容一致'},
+  'TY-03':{t:'收货地址显示正确',e:'与结账填写地址完全一致'},
+  'TY-04':{t:'客户收到订单确认邮件',e:'5 分钟内到达，内容正确'},
+  'TY-05':{t:'继续购物按钮跳转正确',e:'链接有效，不报错'},
+  'TY-06':{t:'GA4 / Meta Pixel 购买事件触发',e:'实时报告可见 purchase event'},
+  'TY-UX1':{t:'页面内容加载后即时可见，无长时间空白',e:'订单信息快速渲染'},
+  'TY-L1':{t:'感谢页文字为当地语言',e:'标题和正文已本地化'},
+  'TY-L2':{t:'确认邮件内容为当地语言',e:'邮件正文无英文混杂'},
+  'F-01':{t:'FAQ 页面正常加载，标题显示正确',e:'无占位符，标题清晰'},
+  'F-02':{t:'所有问答内容完整，无缺失',e:'与来源文档一致'},
+  'F-03':{t:'Accordion 展开/收起功能正常',e:'点击后答案展开，再次点击收起'},
+  'F-04':{t:'FAQ 内所有链接有效',e:'无死链'},
+  'F-05':{t:'联系我们入口链接可用',e:'跳转联系页或弹出表单'},
+  'F-UX1':{t:'Accordion 动画流畅',e:'高度过渡自然，无跳帧'},
+  'F-L1':{t:'FAQ 问题表达符合当地用户习惯',e:'非直译，贴近本地消费者关切'},
+  'F-L2':{t:'FAQ 答案流畅，无机器翻译痕迹',e:'语气自然，专业术语准确'},
+  'PO-01':{t:'页面可访问且内容完整',e:'无 404，所有内容可见'},
+  'PO-01b':{t:'无占位符文字（如 [Company Name]）',e:'所有品牌/联系信息已填写'},
+  'PO-01c':{t:'政策链接在页脚可见',e:'可从 Footer 访问'},
+  'PO-02':{t:'页面可访问且内容完整',e:'无 404，所有内容可见'},
+  'PO-02b':{t:'配送时间和费用符合当前站点',e:'与实际配送设置一致'},
+  'PO-02c':{t:'无占位符文字',e:'所有信息已填写'},
+  'PO-03':{t:'页面可访问且内容完整',e:'无 404，所有内容可见'},
+  'PO-03b':{t:'GDPR / 当地数据法规引用正确（EU 站点）',e:'正确引用适用法规'},
+  'PO-03c':{t:'无占位符文字',e:'所有信息已填写'},
+  'PO-04':{t:'页面可访问且内容完整',e:'无 404，所有内容可见'},
+  'PO-04b':{t:'无占位符文字',e:'所有信息已填写'},
+  'PO-L1':{t:'政策文件已翻译为当地语言',e:'非英文原版，已完整本地化'},
+  'PO-L2':{t:'法律法规引用符合当地要求',e:'GDPR（EU）、消费者权益法等正确引用'},
+};
+function it(no){ return LNG==='zh' && ZH_ITEMS[no] ? ZH_ITEMS[no] : null; }
+
+// ─── Data ────────────────────────────────────────────────────────────────────
+var SITES=[
+  {id:'fr',label:'🇫🇷 FR',prefix:'fr'},
+  {id:'it',label:'🇮🇹 IT',prefix:'it-it'},
+  {id:'es',label:'🇪🇸 ES',prefix:'es-es'},
+  {id:'nl',label:'🇳🇱 NL',prefix:'nl-nl'},
+  {id:'de',label:'🇩🇪 DE',prefix:'de-de'},
+  {id:'uk',label:'🇬🇧 UK',prefix:'en-gb'},
+  {id:'us',label:'🇺🇸 US',prefix:'en-us'},
+];
+
+var PRODUCTS=[
+  {key:'p1',name:'Book Nook',template:'Book Nook',col:'book-nook-nouveautes',handle:'book-nook-salle-des-etoiles-magiques'},
+  {key:'p2',name:'Maison Miniature',template:'Maison Miniature',col:'maison-miniature',handle:'maison-miniature-la-maison-des-fleurs-de-cathy'},
+  {key:'p3',name:'Puzzle 3D',template:'Puzzle 3D',col:'puzzles-3d',handle:'puzzle-3d-maison-dans-l-arbre-de-sakura'},
+  {key:'p4',name:'Puzzle en Bois',template:'Puzzle en Bois',col:'puzzles-en-bois',handle:'puzzle-en-bois-adulte-poulpe-colore'},
+];
+function pUrl(prefix,pr){ return 'https://diy-booknookkit.com/'+prefix+'/collections/'+pr.col+'/products/'+pr.handle; }
+
+var POLICIES=[
+  {key:'po1',name:'Refund Policy',path:'/policies/refund-policy',items:[
+    {no:'PO-01',text:'Page accessible and loads completely',expect:'No 404, all content visible'},
+    {no:'PO-01b',text:'No placeholder text left (e.g. [Company Name])',expect:'All brand/contact info filled in'},
+    {no:'PO-01c',text:'Policy link visible in footer',expect:'Accessible from Footer'},
+  ]},
+  {key:'po2',name:'Shipping Policy',path:'/policies/shipping-policy',items:[
+    {no:'PO-02',text:'Page accessible and loads completely',expect:'No 404, all content visible'},
+    {no:'PO-02b',text:'Shipping times and costs correct for this locale',expect:'Matches actual delivery settings'},
+    {no:'PO-02c',text:'No placeholder text left',expect:'All info filled in'},
+  ]},
+  {key:'po3',name:'Privacy Policy',path:'/policies/privacy-policy',items:[
+    {no:'PO-03',text:'Page accessible and loads completely',expect:'No 404, all content visible'},
+    {no:'PO-03b',text:'GDPR / local data law references correct (EU locales)',expect:'Correct regulation referenced'},
+    {no:'PO-03c',text:'No placeholder text left',expect:'All info filled in'},
+  ]},
+  {key:'po4',name:'Terms of Service',path:'/policies/terms-of-service',items:[
+    {no:'PO-04',text:'Page accessible and loads completely',expect:'No 404, all content visible'},
+    {no:'PO-04b',text:'No placeholder text left',expect:'All info filled in'},
+  ]},
+];
+var POLICY_SHARED=[
+  {tag:'lang',label:'Language & Localisation',items:[
+    {no:'PO-L1',text:'Policy document translated into local language',expect:'Not the English original'},
+    {no:'PO-L2',text:'Legal references match local regulations',expect:'GDPR (EU), consumer law etc. correctly referenced'},
+  ]},
+  {tag:'lang',label:'',isNotes:true,items:[
+    {type:'text',no:'PO-LN',label:'Language notes',placeholder:'Note any policy phrasing, legal terminology or translation issues...'},
+  ]},
+];
+
+var PROD_SECS=[
+  {tag:'func',label:'Functional',items:[
+    {no:'P-01',text:'Product title & price display correctly',expect:'Matches Shopify admin'},
+    {no:'P-02',text:'Product images & gallery carousel work',expect:'Thumbnails clickable, main image updates'},
+    {no:'P-03',text:'Variant selection switches correctly',expect:'Image and price update on switch'},
+    {no:'P-04',text:'Add to Cart button works',expect:'Cart count +1, drawer/sidebar appears'},
+    {no:'P-05',text:'Out-of-stock: Add to Cart button not shown',expect:'Site uses Selly Easy — no quantity selector. Button hidden when out of stock is expected, not a bug.',isNote:true},
+    {no:'P-06',text:'Buy Now button goes straight to checkout (if shown)',expect:'Redirects to /checkout with item pre-loaded'},
+    {no:'P-07',text:'Embedded product video loads and plays',expect:'No spinner/error, video plays normally'},
+    {no:'P-08',text:'FAQ section expands/collapses correctly',expect:'Accordion opens and closes smoothly'},
+    {no:'P-09',text:'Discover More collection module displays',expect:'Related product cards load, links work'},
+    {no:'P-10',text:'Scrolling marquee / banner animates',expect:'Continuous scroll, no freezing'},
+    {no:'P-11',text:'Why Choose Us — 3-column section complete',expect:'All 3 columns show icon + text'},
+    {no:'P-12',text:'Reviews section loads',expect:'Star ratings, text and dates visible'},
+    {no:'P-13',text:'Price shows correct local currency',expect:'FR/DE/NL → €   UK → £   US → $'},
+  ]},
+  {tag:'ux',label:'Interaction & Animation',items:[
+    {no:'P-UX1',text:'Image carousel transition is smooth',expect:'No lag, thumbnail highlights in sync'},
+    {no:'P-UX2',text:'Add to Cart gives instant visual feedback',expect:'Response within 0.5s'},
+    {no:'P-UX3',text:'FAQ accordion animation is smooth',expect:'Height transition natural, no jump'},
+    {no:'P-UX4',text:'Scroll-in animations work across all sections',expect:'Fade/slide effects smooth, not distracting'},
+    {no:'P-UX5',text:'Mobile layout correct — all sections stack cleanly',expect:'Video, FAQ, Why Choose Us in correct order'},
+  ]},
+  {tag:'lang',label:'Language & Localisation',items:[
+    {no:'P-L1',text:'Product title and description reads naturally',expect:'No machine-translation feel'},
+    {no:'P-L2',text:'FAQ questions and answers feel local',expect:'Matches local reading habits'},
+    {no:'P-L3',text:'Why Choose Us copy is localised',expect:'Value props resonate with local audience'},
+    {no:'P-L4',text:'Button labels (Add to Cart / Buy Now) are natural',expect:'Not a direct translation'},
+  ]},
+  {tag:'lang',label:'',isNotes:true,items:[
+    {type:'text',no:'P-LN',label:'Language notes',placeholder:'Note any unnatural phrasing, grammar issues, or translation problems...'},
+  ]},
+];
+
+var PAGES=[
+  {key:'home',label:'Homepage',path:'',sections:[
+    {tag:'func',label:'Functional',items:[
+      {no:'H-01',text:'Page loads without errors',expect:'HTTP 200, all resources load'},
+      {no:'H-02',text:'Hero Banner image/video correct, no distortion',expect:'Correct ratio and resolution'},
+      {no:'H-03',text:'Hero CTA button links to correct page',expect:'Goes to right collection or product'},
+      {no:'H-04',text:'All main nav items expand on click',expect:'Dropdowns open, no broken links'},
+      {no:'H-05',text:'Logo click returns to homepage',expect:'Goes to language root path'},
+      {no:'H-06',text:'Featured product cards show image and price',expect:'No broken images, correct currency'},
+      {no:'H-07',text:'Announcement Bar link is clickable',expect:'Goes to shipping policy page'},
+      {no:'H-08',text:'All footer links work (policy / social / contact)',expect:'No dead links'},
+      {no:'H-09',text:'Newsletter signup form submits successfully',expect:'Success message shown after submit'},
+    ]},
+    {tag:'ux',label:'Interaction & Animation',items:[
+      {no:'H-UX1',text:'Nav dropdown open/close animation is smooth',expect:'No lag, transition natural'},
+      {no:'H-UX2',text:'Product card hover effect works',expect:'Hover state responds, no flicker'},
+      {no:'H-UX3',text:'Page scroll is smooth, no jank',expect:'No layout shifts during scroll'},
+      {no:'H-UX4',text:'Mobile hamburger menu opens/closes smoothly',expect:'Animation works correctly'},
+      {no:'H-UX5',text:'Mobile layout — no horizontal scroll or overflow',expect:'All elements within viewport on < 768px'},
+    ]},
+    {tag:'lang',label:'Language & Localisation',items:[
+      {no:'H-L1',text:'Announcement Bar copy reads naturally',expect:'Not a direct translation, feels local'},
+      {no:'H-L2',text:'Hero Banner headline/subheadline is natural',expect:'Tone fits brand, not robotic'},
+      {no:'H-L3',text:'Currency and language match current locale',expect:'FR → €   DE → €   UK → £   US → $'},
+    ]},
+    {tag:'lang',label:'',isNotes:true,items:[{type:'text',no:'H-LN',label:'Language notes',placeholder:'Note any unnatural phrasing, grammar issues, or navigation labels that feel off...'}]},
+  ]},
+  {key:'collection',label:'Collection',path:'/collections/all',sections:[
+    {tag:'func',label:'Functional',items:[
+      {no:'C-01',text:'Collection title and description correct',expect:'Matches backend, no placeholders'},
+      {no:'C-02',text:'All product card images load',expect:'No broken images, alt tags present'},
+      {no:'C-03',text:'Cards show name, price, sold-out label',expect:'All info visible, no blank cards'},
+      {no:'C-04',text:'Sort (price / new) works correctly',expect:'Product order changes correctly'},
+      {no:'C-05',text:'Filter works (if available)',expect:'List updates on filter selection'},
+      {no:'C-06',text:'Clicking a card goes to the correct product page',expect:'URL correct, product info matches'},
+    ]},
+    {tag:'ux',label:'Interaction & Animation',items:[
+      {no:'C-UX1',text:'Filter/sort switch is smooth — no full-page flash',expect:'List updates without white-screen reload'},
+      {no:'C-UX2',text:'Mobile: 1-2 column grid adapts, no overflow',expect:'Clean layout, images not distorted'},
+      {no:'C-UX3',text:'Load more / infinite scroll triggers correctly',expect:'Loads next batch near bottom of page'},
+    ]},
+    {tag:'lang',label:'Language & Localisation',items:[
+      {no:'C-L1',text:'Collection title and description reads naturally',expect:'No machine-translation feel'},
+      {no:'C-L2',text:'Filter labels are localised correctly',expect:'Color, size, category names feel native'},
+    ]},
+    {tag:'lang',label:'',isNotes:true,items:[{type:'text',no:'C-LN',label:'Language notes',placeholder:'Note any collection page phrasing or translation issues...'}]},
+  ]},
+  {key:'product',label:'Product',path:null,isProduct:true},
+  {key:'cart',label:'Cart',path:'/cart',sections:[
+    {tag:'func',label:'Functional',items:[
+      {no:'CA-01',text:'Cart shows all added items correctly',expect:'Name, variant, price all correct'},
+      {no:'CA-02',text:'Quantity change updates total in real time',expect:'Total recalculates immediately'},
+      {no:'CA-03',text:'Removing an item recalculates total',expect:'Item gone, total updates'},
+      {no:'CA-04',text:'Discount code input works, valid code applies',expect:'Invalid code shows error message'},
+      {no:'CA-05',text:'Checkout button goes to /checkout with items',expect:'Cart contents carried over correctly'},
+      {no:'CA-06',text:'Empty cart shows friendly message + CTA',expect:'CTA links to homepage or collection'},
+    ]},
+    {tag:'ux',label:'Interaction & Animation',items:[
+      {no:'CA-UX1',text:'Quantity update has no visible delay',expect:'Price updates within 1s, no blank flash'},
+      {no:'CA-UX2',text:'Mobile cart layout correct',expect:'No overlap or overflow of elements'},
+    ]},
+    {tag:'lang',label:'Language & Localisation',items:[
+      {no:'CA-L1',text:'All cart page text is in the correct language',expect:'Subtotal, checkout button etc. localised'},
+    ]},
+    {tag:'lang',label:'',isNotes:true,items:[{type:'text',no:'CA-LN',label:'Language notes',placeholder:'Note any cart page phrasing issues...'}]},
+  ]},
+  {key:'checkout',label:'Checkout',path:'/checkout',sections:[
+    {tag:'func',label:'Functional',items:[
+      {no:'CK-01',text:'Checkout shows correct order summary',expect:'Matches cart contents exactly'},
+      {no:'CK-02',text:'Email field validates format',expect:'Error shown for invalid email'},
+      {no:'CK-03',text:'Required address fields validate on submit',expect:'Field-level errors shown if empty'},
+      {no:'CK-04',text:'Shipping options display and are selectable',expect:'Rates correct per delivery settings'},
+      {no:'CK-05',text:'Payment methods all display',expect:'Matches payment gateway config'},
+      {no:'CK-06',text:'Test payment completes successfully',expect:'Order created, confirmation email sent'},
+      {no:'CK-07',text:'Payment failure shows friendly error message',expect:'Clear reason given, filled data not lost'},
+      {no:'CK-08',text:'SSL padlock visible, full HTTPS throughout',expect:'No browser security warning'},
+    ]},
+    {tag:'ux',label:'Interaction & Animation',items:[
+      {no:'CK-UX1',text:'Tab/click between form fields is smooth',expect:'Focus state clear, no jumping'},
+      {no:'CK-UX2',text:'Mobile: keyboard does not cover form fields',expect:'All fields reachable while typing'},
+      {no:'CK-UX3',text:'Country switch updates province/zip fields',expect:'Fields adapt to selected country'},
+    ]},
+    {tag:'lang',label:'Language & Localisation',items:[
+      {no:'CK-L1',text:'Checkout page language matches locale',expect:'No English or other language bleed'},
+      {no:'CK-L2',text:'Error messages are in local language',expect:'Not English default messages'},
+    ]},
+    {tag:'lang',label:'',isNotes:true,items:[{type:'text',no:'CK-LN',label:'Language notes',placeholder:'Note any checkout phrasing or translation issues...'}]},
+  ]},
+  {key:'thankyou',label:'Thank You',path:'/thank_you',sections:[
+    {tag:'func',label:'Functional',items:[
+      {no:'TY-01',text:'Thank you page shows order number clearly',expect:'Order #XXXXX visible'},
+      {no:'TY-02',text:'Order summary (items / qty / total) is correct',expect:'Matches what was ordered'},
+      {no:'TY-03',text:'Delivery address shown correctly',expect:'Matches address entered at checkout'},
+      {no:'TY-04',text:'Customer receives confirmation email',expect:'Arrives within 5 min, content correct'},
+      {no:'TY-05',text:'Continue Shopping button links correctly',expect:'No errors, correct destination'},
+      {no:'TY-06',text:'GA4 / Meta Pixel purchase event fires',expect:'Visible in real-time reports'},
+    ]},
+    {tag:'ux',label:'Interaction & Animation',items:[
+      {no:'TY-UX1',text:'Page content visible immediately after load',expect:'No long blank/loading state'},
+    ]},
+    {tag:'lang',label:'Language & Localisation',items:[
+      {no:'TY-L1',text:'Thank you page copy is in local language',expect:'Heading and body text localised'},
+      {no:'TY-L2',text:'Confirmation email is in local language',expect:'No English mixed into email body'},
+    ]},
+    {tag:'lang',label:'',isNotes:true,items:[{type:'text',no:'TY-LN',label:'Language notes',placeholder:'Note any thank you page or email phrasing issues...'}]},
+  ]},
+  {key:'faq',label:'FAQ',path:'/pages/faq',sections:[
+    {tag:'func',label:'Functional',items:[
+      {no:'F-01',text:'FAQ page loads, title displays correctly',expect:'No placeholders visible'},
+      {no:'F-02',text:'All Q&A content complete, nothing missing',expect:'Matches source document'},
+      {no:'F-03',text:'Accordion expand/collapse works',expect:'Clicks open and close answers'},
+      {no:'F-04',text:'All links within FAQ are valid',expect:'No dead links'},
+      {no:'F-05',text:'Contact us link / entry point is available',expect:'Goes to contact page or opens form'},
+    ]},
+    {tag:'ux',label:'Interaction & Animation',items:[
+      {no:'F-UX1',text:'Accordion animation is smooth',expect:'Height transition natural, no jump'},
+    ]},
+    {tag:'lang',label:'Language & Localisation',items:[
+      {no:'F-L1',text:'FAQ questions feel natural for local users',expect:'Not a direct translation of generic FAQs'},
+      {no:'F-L2',text:'FAQ answers are fluent, no machine-translation feel',expect:'Natural tone, correct terminology'},
+    ]},
+    {tag:'lang',label:'',isNotes:true,items:[{type:'text',no:'F-LN',label:'Language notes',placeholder:'Note any FAQ questions or answers that feel unnatural...'}]},
+  ]},
+  {key:'policy',label:'Policies',path:null,isPolicy:true},
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+var activeSite=null, activePage='home';
+var STATE={}, NOTES={}, EVIDENCE={};
+
+function initState(){
+  SITES.forEach(function(s){
+    STATE[s.id]={}; NOTES[s.id]={}; EVIDENCE[s.id]={};
+    PAGES.forEach(function(pg){
+      if(pg.isProduct){
+        PRODUCTS.forEach(function(pr){
+          PROD_SECS.forEach(function(sec){ sec.items.forEach(function(item){
+            if(item.type==='text') NOTES[s.id][pr.key+'_'+item.no]='';
+            else STATE[s.id][pr.key+'_'+item.no]=null;
+          });});
+        });
+      } else if(pg.isPolicy){
+        POLICIES.forEach(function(po){
+          po.items.forEach(function(item){ STATE[s.id][po.key+'_'+item.no]=null; });
+          POLICY_SHARED.forEach(function(sec){ sec.items.forEach(function(item){
+            if(item.type==='text') NOTES[s.id][po.key+'_'+item.no]='';
+            else STATE[s.id][po.key+'_'+item.no]=null;
+          });});
+        });
+      } else {
+        pg.sections.forEach(function(sec){ sec.items.forEach(function(item){
+          if(item.type==='text') NOTES[s.id][item.no]='';
+          else STATE[s.id][item.no]=null;
+        });});
+      }
+    });
+  });
+}
+initState();
+
+function curSite(){ return SITES.find(function(s){return s.id===activeSite;}); }
+function curPage(){ return PAGES.find(function(p){return p.key===activePage;}); }
+
+// ─── Count ────────────────────────────────────────────────────────────────────
+function countPg(pg){
+  var f=0,d=0,tot=0;
+  function chk(k){ tot++; var v=STATE[activeSite][k]; if(v==='fail')f++; if(v!==null)d++; }
+  if(pg.isProduct){
+    PRODUCTS.forEach(function(pr){ PROD_SECS.forEach(function(sec){ sec.items.forEach(function(item){ if(item.type!=='text') chk(pr.key+'_'+item.no); }); }); });
+  } else if(pg.isPolicy){
+    POLICIES.forEach(function(po){
+      po.items.forEach(function(item){ chk(po.key+'_'+item.no); });
+      POLICY_SHARED.forEach(function(sec){ sec.items.forEach(function(item){ if(item.type!=='text') chk(po.key+'_'+item.no); }); });
+    });
+  } else {
+    pg.sections.forEach(function(sec){ sec.items.forEach(function(item){ if(item.type!=='text') chk(item.no); }); });
+  }
+  return {f:f,d:d,tot:tot};
+}
+
+// ─── Render helpers ────────────────────────────────────────────────────────────
+function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!==undefined)e.innerHTML=html; return e; }
+function esc(v){
+  return String(v||'').replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+var TAG_CLS={func:'sf',ux:'su',lang:'sl'};
+
+function getEvidence(k){
+  return activeSite && EVIDENCE[activeSite] ? EVIDENCE[activeSite][k] : null;
+}
+
+function renderEvidenceControls(k){
+  var ev=getEvidence(k);
+  var html='<div class="ev-actions" data-k="'+esc(k)+'">'+
+    '<button class="ev-btn" type="button" data-act="upload" data-k="'+esc(k)+'">'+L('uploadImg')+'</button>'+
+    '<button class="ev-btn" type="button" data-act="capture" data-k="'+esc(k)+'">'+L('captureImg')+'</button>';
+  if(ev){
+    html+='<a class="ev-thumb" href="'+ev.dataUrl+'" download="'+esc(ev.name)+'" target="_blank" title="'+esc(ev.name)+'">'+
+      '<img src="'+ev.dataUrl+'" alt="'+esc(L('evidence'))+'"><span class="ev-name">'+esc(ev.name)+'</span></a>'+
+      '<button class="ev-remove" type="button" data-act="remove" data-k="'+esc(k)+'">'+L('removeEvidence')+'</button>';
+  } else {
+    html+='<span class="ev-empty">'+L('noEvidence')+'</span>';
+  }
+  return html+'</div>';
+}
+
+function buildRows(sections, getKey, getUrl){
+  var frag=document.createDocumentFragment();
+  sections.forEach(function(sec){
+    if(sec.isNotes){
+      sec.items.forEach(function(item){
+        var nk=getKey(item.no);
+        var zhN = LNG==='zh' && ZH_ITEMS[item.no];
+        var lbl = zhN ? zhN.t||item.label : item.label;
+        var ph  = zhN ? zhN.e||item.placeholder : item.placeholder;
+        var row=el('div','note-row');
+        var label=el('div','note-lbl',lbl);
+        var ta=el('textarea');
+        ta.placeholder=ph||'';
+        ta.value=NOTES[activeSite][nk]||'';
+        ta.addEventListener('input',function(){ NOTES[activeSite][nk]=ta.value; });
+        row.appendChild(label); row.appendChild(ta);
+        frag.appendChild(row);
+      });
+      return;
+    }
+    var secEl=el('div');
+    var secLbl = LNG==='zh' ? (ZH.sec[sec.tag]||sec.label) : sec.label;
+    var hdr=el('div','sec-hdr','<span class="stag '+TAG_CLS[sec.tag]+'">'+secLbl+'</span>'+secLbl);
+    secEl.appendChild(hdr);
+    sec.items.forEach(function(item){
+      var k=getKey(item.no);
+      var cur=STATE[activeSite][k];
+      var zh=it(item.no);
+      var txt=zh?zh.t:item.text;
+      var exp=zh?zh.e:item.expect;
+      var cls='row'+(cur?{pass:' dp',fail:' df',na:' dn'}[cur]||'':'');
+      var row=el('div',cls);
+      var noteHtml=item.isNote?'<div class="rnote">'+exp+'</div>':'';
+      row.innerHTML='<div class="ri"><div class="rm"><span class="rno">'+item.no+'</span><a class="rlink" href="'+getUrl()+'" target="_blank">↗ '+(LNG==='zh'?'打开':'open')+'</a></div><div class="rtxt">'+txt+'</div>'+(item.isNote?'':('<div class="rexp">'+exp+'</div>'))+noteHtml+renderEvidenceControls(k)+'</div><div class="rbtns"><button class="rb'+(cur==='pass'?' rp':'')+'" data-k="'+k+'" data-v="pass">✓</button><button class="rb'+(cur==='fail'?' rf':'')+'" data-k="'+k+'" data-v="fail">✗</button><button class="rb'+(cur==='na'?' rn':'')+'" data-k="'+k+'" data-v="na">—</button></div>';
+      secEl.appendChild(row);
+    });
+    frag.appendChild(secEl);
+  });
+  frag.querySelectorAll && frag.querySelectorAll('.rb'); // no-op
+  return frag;
+}
+
+function attachBtns(container){
+  container.querySelectorAll('.rb').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var k=btn.dataset.k, v=btn.dataset.v;
+      STATE[activeSite][k] = STATE[activeSite][k]===v ? null : v;
+      renderPage(); updateProg(); updateFooter(); updateTabs();
+    });
+  });
+}
+
+var pendingEvidenceKey=null;
+
+function initEvidenceInput(){
+  var input=document.getElementById('evidenceInput');
+  input.addEventListener('change',function(){
+    var file=input.files && input.files[0];
+    var k=pendingEvidenceKey;
+    input.value='';
+    pendingEvidenceKey=null;
+    if(file && k) readEvidenceFile(k,file);
+  });
+  document.getElementById('body').addEventListener('click',function(e){
+    var btn=e.target.closest && e.target.closest('.ev-btn,.ev-remove');
+    if(!btn || !this.contains(btn)) return;
+    var k=btn.dataset.k;
+    if(btn.dataset.act==='upload') openEvidencePicker(k);
+    if(btn.dataset.act==='capture') captureEvidence(k);
+    if(btn.dataset.act==='remove') setEvidence(k,null);
+  });
+}
+
+function openEvidencePicker(k){
+  pendingEvidenceKey=k;
+  document.getElementById('evidenceInput').click();
+}
+
+function readEvidenceFile(k,file){
+  if(!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type||'')){
+    alert(L('badImage'));
+    return;
+  }
+  var reader=new FileReader();
+  reader.onload=function(){
+    setEvidence(k,{name:file.name||'evidence-image',dataUrl:String(reader.result),capturedAt:new Date().toISOString()});
+  };
+  reader.onerror=function(){ alert(L('readImageFail')); };
+  reader.readAsDataURL(file);
+}
+
+async function captureEvidence(k){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+    alert(L('shotUnsupported'));
+    return;
+  }
+  var stream;
+  try{
+    stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
+    var video=document.createElement('video');
+    video.srcObject=stream;
+    await new Promise(function(resolve){ video.onloadedmetadata=resolve; });
+    await video.play();
+    var canvas=document.createElement('canvas');
+    canvas.width=video.videoWidth;
+    canvas.height=video.videoHeight;
+    if(!canvas.width || !canvas.height) throw new Error('No video frame captured');
+    canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+    var name='screenshot-'+new Date().toISOString().replace(/[:.]/g,'-')+'.jpg';
+    setEvidence(k,{name:name,dataUrl:canvas.toDataURL('image/jpeg',0.84),capturedAt:new Date().toISOString()});
+  }catch(err){
+    alert(L('shotCancelled'));
+  }finally{
+    if(stream) stream.getTracks().forEach(function(track){ track.stop(); });
+  }
+}
+
+function setEvidence(k,ev){
+  if(!EVIDENCE[activeSite]) EVIDENCE[activeSite]={};
+  if(ev) EVIDENCE[activeSite][k]=ev;
+  else delete EVIDENCE[activeSite][k];
+  refreshEvidence(k);
+}
+
+function refreshEvidence(k){
+  document.querySelectorAll('.ev-actions').forEach(function(node){
+    if(node.dataset.k===k) node.outerHTML=renderEvidenceControls(k);
+  });
+}
+
+function evidenceText(k){
+  var ev=getEvidence(k);
+  return ev ? ' · '+L('evidence')+' '+(ev.name||'1 image') : '';
+}
+
+// ─── Panels ──────────────────────────────────────────────────────────────────
+function statusStr(pass,fail,done,tot){
+  if(done===0) return L('notStarted');
+  var s=done+'/'+tot+' '+L('tested');
+  if(fail>0) s+=' · '+fail+(LNG==='zh'?' 失败':' fail');
+  if(pass===tot) s+=L('allPass');
+  return s;
+}
+
+function renderProductPanel(){
+  var s=curSite(), body=document.getElementById('body'); body.innerHTML='';
+  var panel=el('div','panel');
+  var note=el('div','panel-note'); note.innerHTML=L('sellyNote');
+  panel.appendChild(note);
+  PRODUCTS.forEach(function(pr){
+    var url=pUrl(s.prefix,pr);
+    var pass=0,fail=0,done=0,tot=0;
+    PROD_SECS.forEach(function(sec){ sec.items.forEach(function(item){
+      if(item.type==='text') return; tot++;
+      var v=STATE[activeSite][pr.key+'_'+item.no];
+      if(v==='pass')pass++; if(v==='fail')fail++; if(v!==null)done++;
+    });});
+    var sCls=fail>0?'sf':done===tot&&tot>0?'sok':'';
+    var card=el('div','card');
+    card.innerHTML='<div class="card-tag">Template: '+pr.template+'</div><div class="card-name">'+pr.name+'</div><div class="card-url">'+url+'</div><div class="card-status '+sCls+'">'+statusStr(pass,fail,done,tot)+'</div><a class="card-jump" href="'+url+'" target="_blank">'+(LNG==='zh'?'测试 ':'Test ')+pr.name+' ↗</a>';
+    var clBtn=el('button','card-cl'); clBtn.textContent=L('fillChecklist');
+    clBtn.onclick=function(){ renderProductChecklist(pr); };
+    card.appendChild(clBtn); panel.appendChild(card);
+  });
+  body.appendChild(panel);
+}
+
+function renderProductChecklist(pr){
+  var s=curSite(), url=pUrl(s.prefix,pr);
+  var body=document.getElementById('body'); body.innerHTML='';
+  var bb=el('div','back-bar');
+  bb.innerHTML='<button class="back-btn" id="backBtn">'+L('backProducts')+'</button><span class="back-name">'+pr.name+'</span><span class="back-tmpl">Template: '+pr.template+'</span><a class="back-open" href="'+url+'" target="_blank">'+L('openProduct')+'</a>';
+  body.appendChild(bb);
+  document.getElementById('backBtn').onclick=function(){ renderProductPanel(); };
+  var frag=buildRows(PROD_SECS,function(no){ return pr.key+'_'+no; },function(){ return url; });
+  body.appendChild(frag);
+  attachBtns(body);
+}
+
+function renderPolicyPanel(){
+  var s=curSite(), body=document.getElementById('body'); body.innerHTML='';
+  var panel=el('div','panel');
+  POLICIES.forEach(function(po){
+    var url='https://diy-booknookkit.com/'+s.prefix+po.path;
+    var pass=0,fail=0,done=0,tot=0;
+    po.items.forEach(function(item){ tot++; var v=STATE[activeSite][po.key+'_'+item.no]; if(v==='pass')pass++; if(v==='fail')fail++; if(v!==null)done++; });
+    POLICY_SHARED.forEach(function(sec){ sec.items.forEach(function(item){ if(item.type==='text') return; tot++; var v=STATE[activeSite][po.key+'_'+item.no]; if(v==='pass')pass++; if(v==='fail')fail++; if(v!==null)done++; }); });
+    var sCls=fail>0?'sf':done===tot&&tot>0?'sok':'';
+    var card=el('div','card');
+    card.innerHTML='<div class="card-name">'+po.name+'</div><div class="card-url">'+url+'</div><div class="card-status '+sCls+'">'+statusStr(pass,fail,done,tot)+'</div><a class="card-jump" href="'+url+'" target="_blank">'+(LNG==='zh'?'打开 ':'Open ')+po.name+' ↗</a>';
+    var clBtn=el('button','card-cl'); clBtn.textContent=L('fillChecklist');
+    clBtn.onclick=function(){ renderPolicyChecklist(po); };
+    card.appendChild(clBtn); panel.appendChild(card);
+  });
+  body.appendChild(panel);
+}
+
+function renderPolicyChecklist(po){
+  var s=curSite(), url='https://diy-booknookkit.com/'+s.prefix+po.path;
+  var body=document.getElementById('body'); body.innerHTML='';
+  var bb=el('div','back-bar');
+  bb.innerHTML='<button class="back-btn" id="backBtn">'+L('backPolicies')+'</button><span class="back-name">'+po.name+'</span><a class="back-open" href="'+url+'" target="_blank">'+L('openPage')+'</a>';
+  body.appendChild(bb);
+  document.getElementById('backBtn').onclick=function(){ renderPolicyPanel(); };
+  var secs=[{tag:'func',label:'Functional',items:po.items}].concat(POLICY_SHARED);
+  var frag=buildRows(secs,function(no){ return po.key+'_'+no; },function(){ return url; });
+  body.appendChild(frag);
+  attachBtns(body);
+}
+
+function renderStandardPage(){
+  var pg=curPage(), s=curSite();
+  var url='https://diy-booknookkit.com/'+s.prefix+pg.path;
+  var body=document.getElementById('body'); body.innerHTML='';
+  var frag=buildRows(pg.sections,function(no){ return no; },function(){ return url; });
+  body.appendChild(frag);
+  attachBtns(body);
+}
+
+// ─── Page head & tabs ────────────────────────────────────────────────────────
+function updatePageHead(){
+  var pg=curPage(), s=curSite();
+  var url,openHtml='';
+  if(pg.isProduct){ url='https://diy-booknookkit.com/'+s.prefix+'/products'; }
+  else if(pg.isPolicy){ url='https://diy-booknookkit.com/'+s.prefix+'/policies'; }
+  else {
+    url='https://diy-booknookkit.com/'+s.prefix+pg.path;
+    var lbl=(LNG==='zh'?ZH:EN).openPage2[pg.key]||('Open '+pg.label);
+    openHtml='<a class="open-btn" href="'+url+'" target="_blank">'+lbl+' ↗</a>';
+  }
+  var tabLbl=(LNG==='zh'?ZH:EN).tabs[pg.key]||pg.label;
+  document.getElementById('pageHeadInner').innerHTML='<div class="ph-l"><div class="ph-title">'+tabLbl+'</div><div class="ph-url">'+url+'</div></div>'+openHtml;
+  document.getElementById('pageHead').style.display='';
+}
+
+function updateTabs(){
+  var bar=document.getElementById('tabBar'); bar.innerHTML='';
+  PAGES.forEach(function(pg){
+    var c=countPg(pg);
+    var tabLbl=(LNG==='zh'?ZH:EN).tabs[pg.key]||pg.label;
+    var badge='';
+    if(c.f>0) badge='<span class="bx bx-f">'+c.f+'</span>';
+    else if(c.d===c.tot&&c.tot>0) badge='<span class="bx bx-ok">✓</span>';
+    var t=el('div','tab'+(activePage===pg.key?' on':''),tabLbl+badge);
+    t.onclick=function(){ activePage=pg.key; renderAll(); };
+    bar.appendChild(t);
+  });
+}
+
+function updateProg(){
+  var all=Object.values(STATE[activeSite]);
+  var tot=all.length, done=all.filter(function(v){return v!==null;}).length;
+  document.getElementById('progFill').style.width=(done/tot*100).toFixed(0)+'%';
+  document.getElementById('progTxt').textContent=done+' / '+tot+' '+L('tested');
+}
+
+function updateFooter(){
+  var all=Object.values(STATE[activeSite]);
+  document.getElementById('fPass').textContent=all.filter(function(v){return v==='pass';}).length;
+  document.getElementById('fFail').textContent=all.filter(function(v){return v==='fail';}).length;
+  document.getElementById('fNA').textContent=all.filter(function(v){return v==='na';}).length;
+}
+
+function renderLocales(){
+  var bar=document.getElementById('localeBar'); bar.innerHTML='';
+  SITES.forEach(function(s){
+    var b=el('button','loc'+(activeSite===s.id?' on':''),s.label);
+    b.onclick=function(){ activeSite=s.id; renderAll(); };
+    bar.appendChild(b);
+  });
+}
+
+function renderPage(){
+  var pg=curPage();
+  if(pg.isProduct) renderProductPanel();
+  else if(pg.isPolicy) renderPolicyPanel();
+  else renderStandardPage();
+}
+
+function renderAll(){
+  renderLocales();
+  if(!activeSite) return;
+  ['progBar','tabBar','footer'].forEach(function(id){ document.getElementById(id).style.display=''; });
+  updateTabs(); updatePageHead(); updateProg(); updateFooter(); renderPage();
+}
+
+// ─── Export ────────────────────────────────────────────────────────────────────
+function buildExport(){
+  var s=curSite(), lines=[L('title')+' — '+s.label,''];
+  PAGES.forEach(function(pg){
+    if(pg.isProduct){
+      PRODUCTS.forEach(function(pr){
+        lines.push('=== Product: '+pr.name+' (Template: '+pr.template+') ===');
+        PROD_SECS.forEach(function(sec){
+          if(sec.label) lines.push('-- '+sec.label+' --');
+          sec.items.forEach(function(item){
+            if(item.type==='text'){ var nv=NOTES[activeSite][pr.key+'_'+item.no]; if(nv) lines.push('[NOTE] '+nv); }
+            else lines.push('['+(STATE[activeSite][pr.key+'_'+item.no]||'untested').toUpperCase()+'] '+item.no+' '+item.text+evidenceText(pr.key+'_'+item.no));
+          });
+        }); lines.push('');
+      });
+    } else if(pg.isPolicy){
+      POLICIES.forEach(function(po){
+        lines.push('=== Policy: '+po.name+' ===');
+        po.items.forEach(function(item){ lines.push('['+(STATE[activeSite][po.key+'_'+item.no]||'untested').toUpperCase()+'] '+item.no+' '+item.text+evidenceText(po.key+'_'+item.no)); });
+        POLICY_SHARED.forEach(function(sec){
+          if(sec.label) lines.push('-- '+sec.label+' --');
+          sec.items.forEach(function(item){
+            if(item.type==='text'){ var nv=NOTES[activeSite][po.key+'_'+item.no]; if(nv) lines.push('[NOTE] '+nv); }
+            else lines.push('['+(STATE[activeSite][po.key+'_'+item.no]||'untested').toUpperCase()+'] '+item.no+' '+item.text+evidenceText(po.key+'_'+item.no));
+          });
+        }); lines.push('');
+      });
+    } else {
+      lines.push('=== '+(pg.label)+' ===');
+      pg.sections.forEach(function(sec){
+        if(sec.label) lines.push('-- '+sec.label+' --');
+        sec.items.forEach(function(item){
+          if(item.type==='text'){ var nv=NOTES[activeSite][item.no]; if(nv) lines.push('[NOTE] '+nv); }
+          else lines.push('['+(STATE[activeSite][item.no]||'untested').toUpperCase()+'] '+item.no+' '+item.text+evidenceText(item.no));
+        });
+      }); lines.push('');
+    }
+  });
+  return lines.join('\n');
+}
+
+function openExport(){ document.getElementById('exportTa').value=buildExport(); document.getElementById('overlay').classList.add('open'); }
+function closeExport(){ document.getElementById('overlay').classList.remove('open'); }
+function doCopy(){
+  var ta=document.getElementById('exportTa'); ta.select();
+  try{ document.execCommand('copy'); document.getElementById('copyBtn').textContent=L('copied'); }catch(e){}
+  setTimeout(function(){ document.getElementById('copyBtn').textContent=L('copy'); },2000);
+}
+
+initEvidenceInput();
+renderLocales();
+</script>
+</body>
+</html>
