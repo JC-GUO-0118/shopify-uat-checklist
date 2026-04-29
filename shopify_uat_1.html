@@ -165,6 +165,7 @@ var EN = {
   fillChecklist:'Fill in checklist', openProduct:'Open product ↗', openPage:'Open page ↗',
   backProducts:'← All products', backPolicies:'← All policies',
   uploadImg:'Upload image', captureImg:'Screenshot', noEvidence:'No evidence image',
+  shotHint:'Choose another browser tab, window, or entire screen in the browser sharing picker.',
   removeEvidence:'Remove', evidence:'Evidence images:',
   badImage:'Please choose a PNG, JPG, WebP or GIF image.',
   readImageFail:'Could not read this image file.',
@@ -183,6 +184,7 @@ var ZH = {
   fillChecklist:'填写清单', openProduct:'打开产品页 ↗', openPage:'打开页面 ↗',
   backProducts:'← 返回所有产品', backPolicies:'← 返回所有政策',
   uploadImg:'上传图片', captureImg:'一键截图', noEvidence:'暂无证据图片',
+  shotHint:'点击后在浏览器弹窗里选择另一个 Chrome 标签、窗口或整个屏幕。',
   removeEvidence:'移除', evidence:'证据图片：',
   badImage:'请选择 PNG、JPG、WebP 或 GIF 图片。',
   readImageFail:'无法读取这张图片。',
@@ -602,7 +604,7 @@ function renderEvidenceControls(k){
   var ev=getEvidence(k);
   var html='<div class="ev-actions" data-k="'+esc(k)+'">'+
     '<button class="ev-btn" type="button" data-act="upload" data-k="'+esc(k)+'">'+L('uploadImg')+'</button>'+
-    '<button class="ev-btn" type="button" data-act="capture" data-k="'+esc(k)+'">'+L('captureImg')+'</button>';
+    '<button class="ev-btn" type="button" data-act="capture" data-k="'+esc(k)+'" title="'+esc(L('shotHint'))+'">'+L('captureImg')+'</button>';
   if(ev){
     html+='<a class="ev-thumb" href="'+ev.dataUrl+'" download="'+esc(ev.name)+'" target="_blank" title="'+esc(ev.name)+'">'+
       '<img src="'+ev.dataUrl+'" alt="'+esc(L('evidence'))+'"><span class="ev-name">'+esc(ev.name)+'</span></a>'+
@@ -704,6 +706,17 @@ function readEvidenceFile(k,file){
   reader.readAsDataURL(file);
 }
 
+function getDisplayMediaOptions(){
+  return {
+    video:{displaySurface:"browser"},
+    audio:false,
+    preferCurrentTab:false,
+    selfBrowserSurface:"exclude",
+    surfaceSwitching:"include",
+    monitorTypeSurfaces:"include"
+  };
+}
+
 async function captureEvidence(k){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
     alert(L('shotUnsupported'));
@@ -711,7 +724,7 @@ async function captureEvidence(k){
   }
   var stream;
   try{
-    stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
+    stream=await navigator.mediaDevices.getDisplayMedia(getDisplayMediaOptions());
     var video=document.createElement('video');
     video.srcObject=stream;
     await new Promise(function(resolve){ video.onloadedmetadata=resolve; });
