@@ -171,6 +171,7 @@ var EN = {
   readImageFail:'Could not read this image file.',
   shotUnsupported:'Screenshot capture is not supported in this browser or context.',
   shotCancelled:'Screenshot was cancelled or blocked.',
+  shotSavedReturn:'Screenshot saved. Return to this UAT tab to continue marking the checklist.',
   sellyNote:'<strong>Note:</strong> This site uses <strong>Selly Easy</strong> instead of native Shopify add-to-cart. No quantity selector — Add to Cart button only. If no button appears, the product is out of stock — this is <strong>expected behaviour, not a bug</strong>.',
   tabs:{home:'Homepage',collection:'Collection',product:'Product',cart:'Cart',checkout:'Checkout',thankyou:'Thank You',faq:'FAQ',policy:'Policies'},
   openPage2:{home:'Open Homepage',collection:'Open Collection',cart:'Open Cart',checkout:'Open Checkout',thankyou:'Open Thank You',faq:'Open FAQ'},
@@ -190,6 +191,7 @@ var ZH = {
   readImageFail:'无法读取这张图片。',
   shotUnsupported:'当前浏览器或打开方式不支持截图功能。',
   shotCancelled:'截图已取消或被浏览器阻止。',
+  shotSavedReturn:'截图已保存。请回到这个 UAT 标签页继续勾选清单。',
   sellyNote:'<strong>注意：</strong>本站使用 <strong>Selly Easy</strong> 替代 Shopify 原生加购功能。没有数量选择器——仅有加入购物车按钮。如果按钮不显示，说明该产品已缺货，这是<strong>正常现象，不是 Bug</strong>。',
   tabs:{home:'首页',collection:'分类页',product:'产品页',cart:'购物车',checkout:'结账',thankyou:'感谢页',faq:'常见问题',policy:'政策页'},
   openPage2:{home:'打开首页',collection:'打开分类页',cart:'打开购物车',checkout:'打开结账页',thankyou:'打开感谢页',faq:'打开 FAQ'},
@@ -717,6 +719,11 @@ function getDisplayMediaOptions(){
   };
 }
 
+function notifyCaptureComplete(){
+  try{ window.focus(); }catch(e){}
+  alert(L('shotSavedReturn'));
+}
+
 async function captureEvidence(k){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
     alert(L('shotUnsupported'));
@@ -736,6 +743,7 @@ async function captureEvidence(k){
     canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
     var name='screenshot-'+new Date().toISOString().replace(/[:.]/g,'-')+'.jpg';
     setEvidence(k,{name:name,dataUrl:canvas.toDataURL('image/jpeg',0.84),capturedAt:new Date().toISOString()});
+    notifyCaptureComplete();
   }catch(err){
     alert(L('shotCancelled'));
   }finally{
