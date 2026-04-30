@@ -659,12 +659,30 @@ function buildRows(sections, getKey, getUrl){
   return frag;
 }
 
+function updateResultRow(btn,k){
+  var row=btn.closest('.row');
+  var cur=STATE[activeSite][k];
+  if(!row) return;
+  row.classList.remove('dp','df','dn');
+  if(cur==='pass') row.classList.add('dp');
+  if(cur==='fail') row.classList.add('df');
+  if(cur==='na') row.classList.add('dn');
+  row.querySelectorAll('.rb').forEach(function(b){
+    if(b.dataset.k!==k) return;
+    b.classList.remove('rp','rf','rn');
+    if(cur==='pass' && b.dataset.v==='pass') b.classList.add('rp');
+    if(cur==='fail' && b.dataset.v==='fail') b.classList.add('rf');
+    if(cur==='na' && b.dataset.v==='na') b.classList.add('rn');
+  });
+}
+
 function attachBtns(container){
   container.querySelectorAll('.rb').forEach(function(btn){
     btn.addEventListener('click',function(){
       var k=btn.dataset.k, v=btn.dataset.v;
       STATE[activeSite][k] = STATE[activeSite][k]===v ? null : v;
-      renderPage(); updateProg(); updateFooter(); updateTabs();
+      updateResultRow(btn,k);
+      updateProg(); updateFooter(); updateTabs();
     });
   });
 }
